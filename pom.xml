@@ -11,8 +11,8 @@
   <url>http://maven.apache.org</url>
   <repositories>
 		<repository>
-			<id>PageTurner Repo</id>
-			<url>https://repo.pageturner-reader.org</url>
+			<id>jitpack.io</id>
+			<url>https://jitpack.io</url>
 		</repository>
   </repositories>
 
@@ -50,9 +50,9 @@
      </dependency>
 
     <dependency>
-        <groupId>com.osbcp.cssparser</groupId>
-        <artifactId>cssparser</artifactId>
-        <version>1.5</version>
+        <groupId>com.github.xleavx</groupId>
+        <artifactId>osbcp-css-parser</artifactId>
+        <version>cssparser-1.7</version>
     </dependency>
     
     <dependency>
