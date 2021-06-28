@@ -18,7 +18,9 @@ package net.nightwhistler.htmlspanner.handlers;
 
 import net.nightwhistler.htmlspanner.SpanStack;
 import net.nightwhistler.htmlspanner.TagNodeHandler;
+import net.nightwhistler.htmlspanner.handlers.attributes.WrappingStyleHandler;
 import net.nightwhistler.htmlspanner.spans.ListItemSpan;
+import net.nightwhistler.htmlspanner.style.Style;
 
 import org.htmlcleaner.TagNode;
 
@@ -31,20 +33,24 @@ import android.text.SpannableStringBuilder;
  * @author Alex Kuiper
  * 
  */
-public class ListItemHandler extends TagNodeHandler {
-
+public class ListItemHandler extends WrappingStyleHandler {
+	
+	public ListItemHandler(StyledTextHandler wrappedHandler) {
+		super(wrappedHandler);
+	}
+	
 	private int getMyIndex(TagNode node) {
 		if (node.getParent() == null) {
 			return -1;
 		}
-
+		
 		int i = 1;
-
+		
 		for (Object child : node.getParent().getAllChildren()) {
 			if (child == node) {
 				return i;
 			}
-
+			
 			if (child instanceof TagNode) {
 				TagNode childNode = (TagNode) child;
 				if ("li".equals(childNode.getName())) {
@@ -52,35 +58,33 @@ public class ListItemHandler extends TagNodeHandler {
 				}
 			}
 		}
-
+		
 		return -1;
 	}
-
+	
 	private String getParentName(TagNode node) {
 		if (node.getParent() == null) {
 			return null;
 		}
-
+		
 		return node.getParent().getName();
 	}
-
+	
 	@Override
-	public void handleTagNode(TagNode node, SpannableStringBuilder builder,
-			int start, int end, SpanStack spanStack) {
-
+	public void handleTagNode(TagNode node, SpannableStringBuilder builder, int start, int end, Style useStyle, SpanStack spanStack) {
 		if (builder.length() > 0
-				&& builder.charAt(builder.length() - 1) != '\n') {
+			&& builder.charAt(builder.length() - 1) != '\n') {
 			builder.append("\n");
 		}
-
+		
 		if ("ol".equals(getParentName(node))) {
 			ListItemSpan bSpan = new ListItemSpan(getMyIndex(node));
-            spanStack.pushSpan(bSpan, start, end);
+			spanStack.pushSpan(bSpan, start, end);
 		} else if ("ul".equals(getParentName(node))) {
 			// Unicode bullet character.
 			ListItemSpan bSpan = new ListItemSpan();
-            spanStack.pushSpan(bSpan, start, end);
+			spanStack.pushSpan(bSpan, start, end);
 		}
-
+		super.handleTagNode(node, builder, start, end, useStyle, spanStack);
 	}
 }

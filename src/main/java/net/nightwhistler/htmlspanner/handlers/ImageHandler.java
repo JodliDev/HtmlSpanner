@@ -27,9 +27,12 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.style.ImageSpan;
+import android.util.Log;
 
 /**
  * Handles image tags.
@@ -41,28 +44,48 @@ import android.text.style.ImageSpan;
  * 
  */
 public class ImageHandler extends TagNodeHandler {
-
+	
+	private static final String ERRORTAG = "Image error";
+	private static final long MAXIMUM_TIME=450;
+	
 	@Override
-	public void handleTagNode(TagNode node, SpannableStringBuilder builder,
-			int start, int end, SpanStack stack) {
-		String src = node.getAttributeByName("src");
-
+	public void handleTagNode(TagNode node, final SpannableStringBuilder builder,
+							  final int start, final int end, final SpanStack stack) {
+		final String src = node.getAttributeByName("src");
+		
 		builder.append("\uFFFC");
-
-		Bitmap bitmap = loadBitmap(src);
-
-		if (bitmap != null) {
-			Drawable drawable = new BitmapDrawable(bitmap);
-			drawable.setBounds(0, 0, bitmap.getWidth() - 1,
-					bitmap.getHeight() - 1);
-
-            stack.pushSpan( new ImageSpan(drawable), start, builder.length() );
+		
+		synchronized (this) {
+			// we load the image on a different thread
+			Handler mainHandler = new Handler(Looper.getMainLooper());
+			
+			Runnable myRunnable = new Runnable() {
+				@Override
+				public void run() {
+					Bitmap bitmap = loadBitmap(src);
+					if (bitmap != null) {
+						Drawable drawable = new BitmapDrawable(bitmap);
+						drawable.setBounds(0, 0, bitmap.getWidth() - 1,
+								bitmap.getHeight() - 1);
+						stack.pushSpan(new ImageSpan(drawable), start, builder.length());
+					}
+				}
+			};
+			mainHandler.post(myRunnable);
+			
+			// we wait until the image is loaded,
+			// if the image is not loaded until the maximum time we didn't show it
+			try {
+				this.wait(MAXIMUM_TIME);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
 	}
-
+	
 	/**
 	 * Loads a Bitmap from the given url.
-	 * 
+	 *
 	 * @param url
 	 * @return a Bitmap, or null if it could not be loaded.
 	 */
