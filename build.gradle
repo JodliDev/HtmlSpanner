@@ -1,7 +1,6 @@
 buildscript {
 
     repositories {
-        jcenter()
         mavenCentral()
         google()
     }
@@ -15,21 +14,20 @@ buildscript {
 allprojects {
 
     repositories {
-        jcenter()
         google()
         mavenCentral()
         maven {
-            url "http://repo.pageturner-reader.org"
+            url "https://jitpack.io"
         }
     }
 
 }
 
-apply plugin: 'android-library'
+apply plugin: 'com.android.library'
 
 dependencies {
-    compile 'net.sourceforge.htmlcleaner:htmlcleaner:2.16'
-    compile 'com.osbcp.cssparser:cssparser:1.5'
+    implementation 'net.sourceforge.htmlcleaner:htmlcleaner:2.16'
+    implementation 'com.github.xleavx:osbcp-css-parser:cssparser-1.7'
 }
 
 android {
